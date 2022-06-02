@@ -8,14 +8,16 @@ export interface CounterProps {
 
 export function Counter({ initialCount = 0, step = 1 }: CounterProps) {
   const [count, setCount] = useState(initialCount);
+  const increment = () => setCount((c) => c + 1);
+  const decrement = () => setCount((c) => Math.max(0, c - 1));
 
   return (
     <Container>
       <Text>{count}</Text>
-      <Button onClick={() => setCount((c) => c + 1)} title="increment">
+      <Button onClick={increment} title="increment">
         +
       </Button>
-      <Button onClick={() => setCount((c) => Math.max(0, c - 1))} title="decrement">
+      <Button onClick={decrement} title="decrement">
         -
       </Button>
     </Container>
