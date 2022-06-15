@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Container, Text, Button } from './Count.styles';
+import { Container, Text, Button } from './Counter.styles';
 
 export interface CounterProps {
   initialCount?: number;
