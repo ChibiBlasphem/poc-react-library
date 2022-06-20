@@ -1,1 +1,1 @@
-export { Counter, type CounterProps } from './Counter/Counter';
+export { Counter, type CounterProps } from './components/Counter/Counter';
