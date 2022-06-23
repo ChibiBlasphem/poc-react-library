@@ -2,13 +2,14 @@ import { PropsWithChildren } from 'react';
 import { Container, PrimaryContainer } from './Card.styles';
 
 interface CardProps {
-    theme: 'default' | 'primary';
+    className?: string;
+    theme?: 'primary';
 }
 
 /**
  * Display an existing file and allow replacing it
  */
-export default function Card({ theme = 'default', children }: PropsWithChildren<CardProps>) {
+export default function Card({ theme, className, children }: PropsWithChildren<CardProps>) {
     let StyledContainer;
     switch (theme) {
         case "primary":
@@ -18,5 +19,10 @@ export default function Card({ theme = 'default', children }: PropsWithChildren<
             StyledContainer = Container;
     }
 
-    return <StyledContainer className="card">{ children }</StyledContainer>;
+    let classes = "card";
+    if (className) {
+        classes += " " + className;
+    }
+
+    return <StyledContainer className={ classes }>{ children }</StyledContainer>;
 }
