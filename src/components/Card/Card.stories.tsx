@@ -10,6 +10,11 @@ const Template: ComponentStory<typeof Card> = (args) => <Card {...args} />;
 
 export const BasicCard = Template.bind({});
 
+export const ClickableCard = Template.bind({});
+ClickableCard.args = {
+    onClick(_e: MouseEvent) { }
+};
+
 export const WithContentCard = Template.bind({});
 WithContentCard.args = { children: <span>Some content</span> };
 
