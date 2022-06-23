@@ -6,3 +6,8 @@ export const Container = styled.div`
   border-radius: 4px;
   box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.24);
 `;
+
+export const PrimaryContainer = styled(Container)`
+  background: #6a8a83;
+  color: white;
+`;

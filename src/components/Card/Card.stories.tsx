@@ -12,3 +12,9 @@ export const BasicCard = Template.bind({});
 
 export const WithContentCard = Template.bind({});
 WithContentCard.args = { children: <span>Some content</span> };
+
+export const PrimaryCard = Template.bind({});
+PrimaryCard.args = {
+    children: <span>Getting more attention</span>,
+    theme: 'primary',
+};
