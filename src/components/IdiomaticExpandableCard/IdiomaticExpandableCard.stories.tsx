@@ -14,7 +14,7 @@ const Template: ComponentStory<typeof IdiomaticExpandableCard> = (args) => (
         very long
       </strong>
     </IdiomaticExpandableCard.Title>
-    <IdiomaticExpandableCard.Detail>
+    <IdiomaticExpandableCard.Details>
       Data:
       <ul>
         <li>A</li>
@@ -27,7 +27,7 @@ const Template: ComponentStory<typeof IdiomaticExpandableCard> = (args) => (
         <li>2</li>
         <li>3</li>
       </ul>
-    </IdiomaticExpandableCard.Detail>
+    </IdiomaticExpandableCard.Details>
   </IdiomaticExpandableCard>
 );
 

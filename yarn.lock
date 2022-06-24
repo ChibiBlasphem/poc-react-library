@@ -9810,6 +9810,11 @@ react-syntax-highlighter@^15.4.5:
     prismjs "^1.27.0"
     refractor "^3.6.0"
 
+react-typed-slots@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/react-typed-slots/-/react-typed-slots-0.2.0.tgz#9abf4f42d1723a9425286660350780ee6668340a"
+  integrity sha512-PS2gjRCAEyUbNMJpOVwUYJ0bXsgijYdc/7t5dtJ5SvToI/4MNb870Zbnkqz1Dt1JSrIHaXYqA904iVw0alzFwQ==
+
 react@^18.1.0:
   version "18.1.0"
   resolved "https://registry.yarnpkg.com/react/-/react-18.1.0.tgz#6f8620382decb17fdc5cc223a115e2adbf104890"

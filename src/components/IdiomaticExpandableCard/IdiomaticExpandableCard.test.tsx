@@ -17,7 +17,7 @@ describe('<ExpandableCard />', () => {
     const { getByRole, queryByText } = render(
       <IdiomaticExpandableCard>
         <IdiomaticExpandableCard.Title>I am here</IdiomaticExpandableCard.Title>
-        <IdiomaticExpandableCard.Detail>I am the details</IdiomaticExpandableCard.Detail>
+        <IdiomaticExpandableCard.Details>I am the details</IdiomaticExpandableCard.Details>
       </IdiomaticExpandableCard>
     );
 
@@ -35,7 +35,7 @@ describe('<ExpandableCard />', () => {
     const { queryByRole, queryByText } = render(
       <IdiomaticExpandableCard expandable={false}>
         <IdiomaticExpandableCard.Title>I am here</IdiomaticExpandableCard.Title>
-        <IdiomaticExpandableCard.Detail>I am the details</IdiomaticExpandableCard.Detail>
+        <IdiomaticExpandableCard.Details>I am the details</IdiomaticExpandableCard.Details>
       </IdiomaticExpandableCard>
     );
 

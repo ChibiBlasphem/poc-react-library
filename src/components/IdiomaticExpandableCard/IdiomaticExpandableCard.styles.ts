@@ -25,7 +25,7 @@ export const Content = styled.div`
   border-right: 2px solid #eaeaea;
 `;
 
-export const ToggleDetail = styled.button`
+export const ToggleDetails = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -39,7 +39,7 @@ export const ToggleDetail = styled.button`
   }
 `;
 
-export const Detail = styled.div`
+export const Details = styled.div`
   border-top: 2px solid #eaeaea;
   padding: 25px;
 `;
