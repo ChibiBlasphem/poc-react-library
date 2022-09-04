@@ -10,6 +10,8 @@ import { usePortalContainer } from '../../hooks/usePortalContainer';
 
 import { Arrow, TooltipContainer, TooltipWrapper } from './Tooltip.styles';
 
+export { TooltipDefaulStyle, generateTooltipVars } from './Tooltip.theme';
+
 export const TOOLTIP_CONTAINER_ID = 'react-tooltip-container';
 
 interface ObjectWithRef<T = unknown> {
