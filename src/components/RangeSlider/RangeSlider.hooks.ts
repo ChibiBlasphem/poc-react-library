@@ -3,8 +3,8 @@ import {
   RefObject,
   TouchEvent as ReactTouchEvent,
   useEffect,
+  useReducer,
   useRef,
-  useState,
 } from 'react';
 
 export interface UseDotMoveOptions {
@@ -13,15 +13,24 @@ export interface UseDotMoveOptions {
   onStopMoving: () => void;
 }
 
+type MovingDotState = { index: null; position: null } | { index: number; position: number };
+
+const movingDotReducer = (_state: MovingDotState, action: MovingDotState): MovingDotState => {
+  return action;
+};
+
 export function useDotMove(
   railRef: RefObject<HTMLDivElement>,
-  interval: number,
+  pixelsPerStep: number,
   positions: number[],
-  { onStartMoving, onStopMoving, onUpdatePosition }: UseDotMoveOptions
+  onUpdate: (dotIndex: number, position: number) => void
 ) {
-  const [dotMoving, setDotMoving] = useState<number | null>(null);
-  const lastDotPositionRef = useRef<number | null>(null);
+  // Storing last event position in a ref to avoid useless rerenders on each event
   const lastEventPositionRef = useRef<number | null>(null);
+  const [movingDotState, setMovingDotState] = useReducer(movingDotReducer, {
+    index: null,
+    position: null,
+  });
 
   const startMoving = (target: HTMLElement, dotNumber: number) => {
     const rail = railRef.current;
@@ -30,9 +39,10 @@ export function useDotMove(
     const railRect = rail.getBoundingClientRect();
     const domRect = target.getBoundingClientRect();
 
-    lastDotPositionRef.current = domRect.left + domRect.width / 2 - railRect.left;
-    onStartMoving(lastDotPositionRef.current);
-    setDotMoving(dotNumber);
+    // Get the center position of the dot relative to the rail
+    const currentDotPosition = domRect.left + domRect.width / 2 - railRect.left;
+
+    setMovingDotState({ index: dotNumber, position: currentDotPosition });
   };
 
   const onMouseDown = (e: ReactMouseEvent<HTMLDivElement>, dotNumber: number) => {
@@ -42,55 +52,58 @@ export function useDotMove(
 
   const onTouchStart = (e: ReactTouchEvent<HTMLDivElement>, dotNumber: number) => {
     if (!e.touches[0]) return;
-
     lastEventPositionRef.current = e.touches[0].clientX;
     startMoving(e.currentTarget, dotNumber);
   };
 
   useEffect(() => {
-    if (dotMoving === null) return;
-    if (!railRef.current) return;
+    if (movingDotState.index === null) return;
+    if (railRef.current === null) return;
 
     const railRect = railRef.current.getBoundingClientRect();
 
-    const handleMove = (movementX: number) => {
-      if (dotMoving === null || lastDotPositionRef.current === null) {
-        return;
-      }
+    const handleMove = (eventX: number) => {
+      if (lastEventPositionRef.current === null) return;
 
-      const prevPosition = positions[dotMoving - 1];
-      const nextPosition = positions[dotMoving + 1];
+      const lastEventPosition = lastEventPositionRef.current;
+      const deltaX = eventX - lastEventPosition;
 
-      const minPosition = prevPosition !== undefined ? prevPosition + interval : 0;
-      const maxPosition = nextPosition !== undefined ? nextPosition - interval : railRect.width;
+      const { index, position } = movingDotState;
 
-      const newPosition = lastDotPositionRef.current + movementX;
-      lastDotPositionRef.current = newPosition;
-      onUpdatePosition(Math.max(minPosition, Math.min(maxPosition, newPosition)));
+      const prevDotPosition = positions[index - 1];
+      const nextDotPosition = positions[index + 1];
+
+      // We don't want dot to overlap
+      // The dot cannot go lower than (prevDotPosition + pixelsPerStep) or 0
+      // The dot cannot go higher than (nextDotPosition - pixelsPerStep) or rail.width
+      const minPosition = prevDotPosition !== undefined ? prevDotPosition + pixelsPerStep : 0;
+      const maxPosition =
+        nextDotPosition !== undefined ? nextDotPosition - pixelsPerStep : railRect.width;
+
+      const presumedNewPosition = position + deltaX;
+      const newPosition = Math.max(minPosition, Math.min(maxPosition, presumedNewPosition));
+
+      const newMovingState = { index, position: newPosition };
+      setMovingDotState(newMovingState);
+      onUpdate(newMovingState.index, newMovingState.position);
+
+      lastEventPositionRef.current = eventX;
     };
 
     const onMouseMove = (e: MouseEvent) => {
-      lastEventPositionRef.current = e.clientX;
-      handleMove(e.movementX);
+      handleMove(e.clientX);
     };
 
     const onTouchMove = (e: TouchEvent) => {
+      // Prevent default behavior to avoid scrolling the page
       e.preventDefault();
-      if (lastEventPositionRef.current === null || !e.touches[0]) return;
+      if (!e.touches[0]) return;
 
-      const lastEventPosition = lastEventPositionRef.current;
-      lastEventPositionRef.current = e.touches[0].clientX;
-
-      handleMove(lastEventPositionRef.current - lastEventPosition);
+      handleMove(e.touches[0].clientX);
     };
 
     const handleStop = () => {
-      if (dotMoving === null) {
-        return;
-      }
-
-      onStopMoving();
-      setDotMoving(null);
+      setMovingDotState({ index: null, position: null });
     };
 
     document.addEventListener('mousemove', onMouseMove);
@@ -104,11 +117,11 @@ export function useDotMove(
       document.removeEventListener('mouseup', handleStop);
       document.removeEventListener('touchend', handleStop);
     };
-  }, [dotMoving, positions, onUpdatePosition, onStopMoving]);
+  }, [movingDotState, positions]);
 
   return {
     onMouseDown,
     onTouchStart,
-    dotMoving,
+    movingDotState,
   };
 }

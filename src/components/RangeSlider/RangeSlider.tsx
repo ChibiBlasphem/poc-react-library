@@ -54,6 +54,7 @@ function RangeSliderDot({
         onTouchStart={onTouchStart}
         style={{ left: `${position}px` }}
         isMoving={isMoving}
+        data-testid="RangeSlider.Dot"
       />
       {isMoving && (
         <Tooltip anchorRef={dotRef} orientation="top">
@@ -68,9 +69,9 @@ export interface RangeSliderProps {
   values: number[];
   min: number;
   max: number;
-  interval?: number;
+  step?: number;
   className?: string;
-  marks?: boolean;
+  showMarks?: boolean;
   onChange: (values: number[]) => void;
 }
 
@@ -84,46 +85,40 @@ export function RangeSlider({
   min,
   max,
   className,
-  interval = 1,
-  marks = false,
+  step = 1,
+  showMarks = false,
   onChange,
 }: RangeSliderProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const sliderRailRef = useRef<HTMLDivElement>(null);
-  const [overridePosition, setOverridePosition] = useState<number>(0);
-  const [railSize, setRailSize] = useState<number>(0);
-  const intervalCount = (max - min) / interval;
-  const intervalPixel = (railSize * interval) / (max - min);
 
-  if (intervalCount !== Math.floor(intervalCount)) {
+  const [railSize, setRailSize] = useState<number>(0);
+  const rangeLength = max - min;
+  const numberOfSteps = rangeLength / step;
+  const pixelsPerStep = (railSize * step) / rangeLength;
+
+  if (numberOfSteps !== Math.floor(numberOfSteps)) {
     throw new Error('Cannot render RangeSlider. `(max - min)` should be dividable by `interval`');
   }
 
-  const basePositions = values.map((v) => ((v - min) / interval) * intervalPixel);
-  const { onMouseDown, onTouchStart, dotMoving } = useDotMove(
+  const dotPositions = values.map((v) => ((v - min) / step) * pixelsPerStep);
+  const { onMouseDown, onTouchStart, movingDotState } = useDotMove(
     sliderRailRef,
-    intervalPixel,
-    basePositions,
-    {
-      onStartMoving(position) {
-        setOverridePosition(position);
-      },
-      onUpdatePosition(position) {
-        setOverridePosition(position);
-      },
-      onStopMoving() {},
+    pixelsPerStep,
+    dotPositions,
+    (dotIndex, dotPosition) => {
+      const newValue = getNearestInterval(pixelsPerStep, dotPosition) * step + min;
+      if (newValue !== values[dotIndex]) {
+        const newValues = values.map((v, i) => (i === dotIndex ? newValue : v));
+        onChange(newValues);
+      }
     }
   );
-  const positions = basePositions.map((p, i) => (dotMoving === i ? overridePosition : p));
+  const positions = dotPositions.map((p, i) =>
+    movingDotState.index === i ? movingDotState.position : p
+  );
   const process = getProcessLimits(railSize, positions);
-  const showMarks = marks && intervalPixel > 40;
-
-  useEffect(() => {
-    if (dotMoving === null) return;
-
-    const newValue = getNearestInterval(intervalPixel, overridePosition) * interval + min;
-    onChange(values.map((v, i) => (i === dotMoving ? newValue : v)));
-  }, [dotMoving, overridePosition, interval, min]);
+  const shouldDisplayMarks = showMarks && pixelsPerStep > 40;
 
   useEffect(() => {
     const rail = sliderRailRef.current;
@@ -144,10 +139,10 @@ export function RangeSlider({
   return (
     <RangeSliderRoot ref={rootRef} className={className}>
       <DOMContextProvider container={rootRef}>
-        {showMarks && (
-          <RangeSliderMarks>
-            {generateMarks(min, max, interval).map((v, i) => (
-              <RangeSliderMark key={i} style={{ left: `${i * intervalPixel}px` }}>
+        {shouldDisplayMarks && (
+          <RangeSliderMarks data-testid="RangeSlider.SliderMarks">
+            {generateMarks(min, max, step).map((v, i) => (
+              <RangeSliderMark key={i} style={{ left: `${i * pixelsPerStep}px` }}>
                 {v}
               </RangeSliderMark>
             ))}
@@ -156,18 +151,18 @@ export function RangeSlider({
         <RangeSliderRail ref={sliderRailRef}>
           {process && (
             <RangeSliderProcess
-              isMoving={dotMoving !== null}
+              isMoving={movingDotState.index !== null}
               style={{ left: process[0], width: process[1] }}
             />
           )}
           {!!railSize &&
             positions.map((p, i) => {
-              const isMoving = dotMoving === i;
+              const isMoving = movingDotState.index === i;
               return (
                 <RangeSliderDot
                   key={i}
                   isMoving={isMoving}
-                  position={isMoving ? overridePosition : p}
+                  position={p}
                   onMouseDown={(e) => onMouseDown(e, i)}
                   onTouchStart={(e) => onTouchStart(e, i)}
                   value={values[i]!}

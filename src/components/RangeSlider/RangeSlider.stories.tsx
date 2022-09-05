@@ -38,7 +38,7 @@ ThreeValues.args = {
 export const WithInterval = Template.bind({});
 WithInterval.args = {
   values: [0, 20],
-  interval: 10,
+  step: 10,
   min: 0,
   max: 100,
 } as any;
@@ -58,8 +58,8 @@ export const CustomStyle: ComponentStory<typeof StyledRangeSlider> = (args) => {
 };
 CustomStyle.args = {
   values: [0, 20],
-  interval: 5,
+  step: 5,
   min: 0,
   max: 100,
-  marks: true,
+  showMarks: true,
 };
