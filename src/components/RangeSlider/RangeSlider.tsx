@@ -1,4 +1,4 @@
-import { MouseEvent, useEffect, useRef, useState } from 'react';
+import { MouseEvent, TouchEvent, useEffect, useRef, useState } from 'react';
 
 import { Tooltip } from '../../components/Tooltip/Tooltip';
 import { DOMContextProvider } from '../../contexts/DOMContextContext';
@@ -34,9 +34,16 @@ interface RangeSliderDotProps {
   isMoving: boolean;
   value: number;
   onMouseDown: (e: MouseEvent<HTMLDivElement>) => void;
+  onTouchStart: (e: TouchEvent<HTMLDivElement>) => void;
 }
 
-function RangeSliderDot({ onMouseDown, position, isMoving, value }: RangeSliderDotProps) {
+function RangeSliderDot({
+  onMouseDown,
+  onTouchStart,
+  position,
+  isMoving,
+  value,
+}: RangeSliderDotProps) {
   const dotRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -44,6 +51,7 @@ function RangeSliderDot({ onMouseDown, position, isMoving, value }: RangeSliderD
       <RangeSliderDotRoot
         ref={dotRef}
         onMouseDown={onMouseDown}
+        onTouchStart={onTouchStart}
         style={{ left: `${position}px` }}
         isMoving={isMoving}
       />
@@ -92,15 +100,20 @@ export function RangeSlider({
   }
 
   const basePositions = values.map((v) => ((v - min) / interval) * intervalPixel);
-  const { onMouseDown, dotMoving } = useDotMove(sliderRailRef, intervalPixel, basePositions, {
-    onStartMoving(position) {
-      setOverridePosition(position);
-    },
-    onUpdatePosition(position) {
-      setOverridePosition(position);
-    },
-    onStopMoving() {},
-  });
+  const { onMouseDown, onTouchStart, dotMoving } = useDotMove(
+    sliderRailRef,
+    intervalPixel,
+    basePositions,
+    {
+      onStartMoving(position) {
+        setOverridePosition(position);
+      },
+      onUpdatePosition(position) {
+        setOverridePosition(position);
+      },
+      onStopMoving() {},
+    }
+  );
   const positions = basePositions.map((p, i) => (dotMoving === i ? overridePosition : p));
   const process = getProcessLimits(railSize, positions);
   const showMarks = marks && intervalPixel > 40;
@@ -156,6 +169,7 @@ export function RangeSlider({
                   isMoving={isMoving}
                   position={isMoving ? overridePosition : p}
                   onMouseDown={(e) => onMouseDown(e, i)}
+                  onTouchStart={(e) => onTouchStart(e, i)}
                   value={values[i]!}
                 />
               );

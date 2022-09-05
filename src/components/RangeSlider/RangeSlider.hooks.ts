@@ -1,4 +1,11 @@
-import { MouseEvent as ReactMouseEvent, RefObject, useEffect, useRef, useState } from 'react';
+import {
+  MouseEvent as ReactMouseEvent,
+  RefObject,
+  TouchEvent as ReactTouchEvent,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 export interface UseDotMoveOptions {
   onStartMoving: (position: number) => void;
@@ -13,18 +20,31 @@ export function useDotMove(
   { onStartMoving, onStopMoving, onUpdatePosition }: UseDotMoveOptions
 ) {
   const [dotMoving, setDotMoving] = useState<number | null>(null);
-  const lastPositionRef = useRef<number | null>(null);
+  const lastDotPositionRef = useRef<number | null>(null);
+  const lastEventPositionRef = useRef<number | null>(null);
 
-  const onMouseDown = (e: ReactMouseEvent<HTMLDivElement>, dotNumber: number) => {
+  const startMoving = (target: HTMLElement, dotNumber: number) => {
     const rail = railRef.current;
     if (!rail) return;
 
     const railRect = rail.getBoundingClientRect();
-    const domRect = e.currentTarget.getBoundingClientRect();
+    const domRect = target.getBoundingClientRect();
 
-    lastPositionRef.current = domRect.left + domRect.width / 2 - railRect.left;
-    onStartMoving(lastPositionRef.current);
+    lastDotPositionRef.current = domRect.left + domRect.width / 2 - railRect.left;
+    onStartMoving(lastDotPositionRef.current);
     setDotMoving(dotNumber);
+  };
+
+  const onMouseDown = (e: ReactMouseEvent<HTMLDivElement>, dotNumber: number) => {
+    lastEventPositionRef.current = e.clientX;
+    startMoving(e.currentTarget, dotNumber);
+  };
+
+  const onTouchStart = (e: ReactTouchEvent<HTMLDivElement>, dotNumber: number) => {
+    if (!e.touches[0]) return;
+
+    lastEventPositionRef.current = e.touches[0].clientX;
+    startMoving(e.currentTarget, dotNumber);
   };
 
   useEffect(() => {
@@ -33,8 +53,8 @@ export function useDotMove(
 
     const railRect = railRef.current.getBoundingClientRect();
 
-    const onMouseMove = (e: MouseEvent) => {
-      if (dotMoving === null || lastPositionRef.current === null) {
+    const handleMove = (movementX: number) => {
+      if (dotMoving === null || lastDotPositionRef.current === null) {
         return;
       }
 
@@ -44,12 +64,27 @@ export function useDotMove(
       const minPosition = prevPosition !== undefined ? prevPosition + interval : 0;
       const maxPosition = nextPosition !== undefined ? nextPosition - interval : railRect.width;
 
-      const newPosition = lastPositionRef.current + e.movementX;
-      lastPositionRef.current = newPosition;
+      const newPosition = lastDotPositionRef.current + movementX;
+      lastDotPositionRef.current = newPosition;
       onUpdatePosition(Math.max(minPosition, Math.min(maxPosition, newPosition)));
     };
 
-    const onMouseUp = () => {
+    const onMouseMove = (e: MouseEvent) => {
+      lastEventPositionRef.current = e.clientX;
+      handleMove(e.movementX);
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+      if (lastEventPositionRef.current === null || !e.touches[0]) return;
+
+      const lastEventPosition = lastEventPositionRef.current;
+      lastEventPositionRef.current = e.touches[0].clientX;
+
+      handleMove(lastEventPositionRef.current - lastEventPosition);
+    };
+
+    const handleStop = () => {
       if (dotMoving === null) {
         return;
       }
@@ -59,16 +94,21 @@ export function useDotMove(
     };
 
     document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
+    document.addEventListener('touchmove', onTouchMove, { passive: false });
+    document.addEventListener('mouseup', handleStop);
+    document.addEventListener('touchend', handleStop);
 
     return () => {
       document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
+      document.removeEventListener('touchmove', onTouchMove);
+      document.removeEventListener('mouseup', handleStop);
+      document.removeEventListener('touchend', handleStop);
     };
   }, [dotMoving, positions, onUpdatePosition, onStopMoving]);
 
   return {
     onMouseDown,
+    onTouchStart,
     dotMoving,
   };
 }
