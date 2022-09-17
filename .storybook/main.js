@@ -1,3 +1,4 @@
+const { resolve } = require('path');
 const { mergeConfig } = require('vite');
 
 module.exports = {
@@ -16,12 +17,23 @@ module.exports = {
   },
 
   async viteFinal(config, { configType }) {
+    const commonOverride = {
+      resolve: {
+        alias: {
+          '@': resolve(__dirname, '../src'),
+        },
+      },
+    };
+
     if (configType !== 'PRODUCTION') {
-      return config;
+      return mergeConfig(config, {
+        ...commonOverride,
+      });
     }
 
     return mergeConfig(config, {
       base: '/poc-react-library/',
+      ...commonOverride,
     });
   },
 };

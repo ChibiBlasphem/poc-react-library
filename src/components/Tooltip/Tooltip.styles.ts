@@ -1,6 +1,6 @@
 import type { FlattenSimpleInterpolation } from 'styled-components';
 import styled, { css } from 'styled-components';
-
+import { cVar } from 'themthem/component';
 import type { AnchorOrientation } from '../../hooks/useAnchor';
 
 type TooltipArrowProps = {
@@ -79,8 +79,7 @@ export const Arrow = styled.div.attrs<TooltipArrowProps>(({ orientation, movedBy
     width: 10px;
     height: 10px;
     transform: translateX(-50%) translateY(-50%) rotate(45deg);
-    background-color: var(--component-Tooltip-background);
-    box-shadow: 0 0 12px 0 rgba(38, 38, 38, 0.2);
+    background-color: ${cVar('Tooltip.background', '#fff')};
   }
 
   ${({ orientation: position }) => setArrowPosition(position)}
@@ -89,10 +88,10 @@ export const Arrow = styled.div.attrs<TooltipArrowProps>(({ orientation, movedBy
 export const TooltipContainer = styled.div`
   position: fixed;
   z-index: 1;
-  background-color: var(--component-Tooltip-background);
-  color: var(--component-Tooltip-text);
+  background-color: ${cVar('Tooltip.background', '#fff')};
+  color: ${cVar('Tooltip.text', '#333')};
   border-radius: 4px;
-  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.16);
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.16));
 `;
 
 export const TooltipWrapper = styled.div`

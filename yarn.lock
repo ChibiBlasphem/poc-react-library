@@ -11091,6 +11091,11 @@ text-table@^0.2.0:
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
   integrity sha1-f17oI66AUgfACvLfSoTsP8+lcLQ=
 
+themthem@0.3.0-alpha.16:
+  version "0.3.0-alpha.16"
+  resolved "https://registry.yarnpkg.com/themthem/-/themthem-0.3.0-alpha.16.tgz#cb1037ee6c94ab3a2d0ca82f9a2c5cce5f5bfeb1"
+  integrity sha512-8c4gIwzlXqi0LuFyPCLtKchItobFxfNFN9fWlgNzgQaD3EbuxYcSm2PXMuWZ6+WQGzCKlmdLPtisN3GTKelJVg==
+
 through2@^2.0.0:
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/through2/-/through2-2.0.5.tgz#01c1e39eb31d07cb7d03a96a70823260b23132cd"

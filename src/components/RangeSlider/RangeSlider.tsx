@@ -13,6 +13,8 @@ import {
   RangeSliderRoot,
 } from './RangeSlider.styles';
 
+export { RangeSliderDefaultStyle, generateRangeSliderVars } from './RangeSlider.theme';
+
 function getProcessLimits(
   railSize: number,
   positions: number[]
